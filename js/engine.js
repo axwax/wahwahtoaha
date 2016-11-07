@@ -213,26 +213,26 @@ e = {
          //speechMsgInput = $('#usersays').val();
        }
        lowerCaseInput = speechMsgInput.toLowerCase();
-       var lowerCasePhrase = "" + e.defaults.currentPhrase.target;
+        var lowerCasePhrase = "" + e.defaults.currentPhrase.target;
        var lowerCasePhraseEnglish = "" + e.defaults.currentPhrase.target;
-   
-       lowerCasePhrase = lowerCasePhrase.toLowerCase();
+
+        lowerCasePhrase = lowerCasePhrase.toLowerCase();
        lowerCasePhraseEnglish = lowerCasePhraseEnglish.toLowerCase();
    
        console.log("LOWER Case Phrase: " + lowerCasePhrase);
        console.log("REMOVE DIACRITICS Phrase: " + e.functions.removeDiacritics(lowerCasePhrase));
-   
-       lowerCasePhrase = e.functions.removeDiacritics(lowerCasePhrase);
+
+        lowerCasePhrase = e.functions.removeDiacritics(lowerCasePhrase);
        lowerCasePhraseEnglish = e.functions.removeDiacritics(lowerCasePhraseEnglish);
-   
+
        if ((lowerCasePhrase == lowerCaseInput)||(lowerCasePhraseEnglish == lowerCaseInput)) {
-         e.defaults.incorrectAnswerCount=0;
-         console.log ("Correct!");
-         // Clear the text input
-         $('#speech-msg').val("");
-         e.functions.getNewPhrase(e.defaults.currentExercise);
-         e.functions.speak();
-       }
+          e.defaults.incorrectAnswerCount=0;
+          console.log ("Correct!");
+          // Clear the text input
+          $('#speech-msg').val("");
+					e.functions.getNewPhrase(e.defaults.currentExercise);
+					e.functions.speak();
+        }				
        else
        {
          e.functions.speak();
@@ -385,6 +385,13 @@ e = {
         }
         return str;
     },
+		
+		removePunctuation(str){
+			var punctRE = /[\u00a1\u00bf\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~]/g;
+			var spaceRE = /\s+/g;
+			str = str.replace(punctRE, '').replace(spaceRE, ' ');
+			return str;
+		},
 
     replayPhrase() {
       e.functions.speak();
@@ -488,7 +495,7 @@ e = {
         // remove diacritics
         lowerCasePhrase = e.functions.removeDiacritics(lowerCasePhrase);
         lowerCaseInput =  e.functions.removeDiacritics(lowerCaseInput);
-
+				
         console.log("LOWER Case Input: " + lowerCaseInput);
         console.log("LOWER Case Phrase: " + lowerCasePhrase);
 
