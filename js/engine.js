@@ -1,3 +1,7 @@
+$(document).ready(function() {
+	e.functions.init();
+});
+
 e = {
   defaults:{
     // speech api language lookup table
@@ -177,6 +181,9 @@ e = {
          var target = $('#target-language').val();
          e.functions.setLanguageTarget(target);
        });
+       
+       // handle all key presses
+       $('input').keydown(e.functions.keydownHandler);
 
       e.functions.getNewPhrase(e.defaults.currentExercise);
 
@@ -193,6 +200,52 @@ e = {
       };
 
     },
+    keydownHandler(event){
+      console.log('keydown');
+      console.log(event);
+      if(event.keyCode == 13){
+       // Check current input text with previous spoken phrase
+   
+       // Get the text input element.
+       var speechMsgInput = $('#speech-msg').val();
+       if (typeof speechMsgInput === 'undefined') {
+         return;
+         //speechMsgInput = $('#usersays').val();
+       }
+       lowerCaseInput = speechMsgInput.toLowerCase();
+       var lowerCasePhrase = "" + e.defaults.currentPhrase.target;
+       var lowerCasePhraseEnglish = "" + e.defaults.currentPhrase.target;
+   
+       lowerCasePhrase = lowerCasePhrase.toLowerCase();
+       lowerCasePhraseEnglish = lowerCasePhraseEnglish.toLowerCase();
+   
+       console.log("LOWER Case Phrase: " + lowerCasePhrase);
+       console.log("REMOVE DIACRITICS Phrase: " + e.functions.removeDiacritics(lowerCasePhrase));
+   
+       lowerCasePhrase = e.functions.removeDiacritics(lowerCasePhrase);
+       lowerCasePhraseEnglish = e.functions.removeDiacritics(lowerCasePhraseEnglish);
+   
+       if ((lowerCasePhrase == lowerCaseInput)||(lowerCasePhraseEnglish == lowerCaseInput)) {
+         e.defaults.incorrectAnswerCount=0;
+         console.log ("Correct!");
+         // Clear the text input
+         $('#speech-msg').val("");
+         e.functions.getNewPhrase(e.defaults.currentExercise);
+         e.functions.speak();
+       }
+       else
+       {
+         e.functions.speak();
+         e.defaults.incorrectAnswerCount++;
+         if (e.defaults.incorrectAnswerCount > 3){
+         }
+         if (e.defaults.incorrectAnswerCount > 5){
+           $('#help').text(e.defaults.currentPhrase.target);
+         }
+       }
+      }      
+    },
+    
    loadPhrases(base,target){
       // base and target are optional - use defaults if omitted
       if (typeof base == 'undefined' || typeof target == 'undefined') {
