@@ -496,6 +496,12 @@ e = {
         lowerCasePhrase = e.functions.removeDiacritics(lowerCasePhrase);
         lowerCaseInput =  e.functions.removeDiacritics(lowerCaseInput);
 				
+        // remove punctuation
+        lowerCasePhrase = e.functions.removePunctuation(lowerCasePhrase);
+        lowerCaseInput =  e.functions.removePunctuation(lowerCaseInput);
+
+				
+
         console.log("LOWER Case Input: " + lowerCaseInput);
         console.log("LOWER Case Phrase: " + lowerCasePhrase);
 
