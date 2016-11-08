@@ -182,7 +182,7 @@ e = {
          e.functions.setLanguageTarget(target);
        });
        
-       // handle all key presses
+       // handle all key presses within input fields
        $('input').keydown(e.functions.keydownHandler);
 
       e.functions.getNewPhrase(e.defaults.currentExercise);
@@ -201,8 +201,8 @@ e = {
 
     },
     keydownHandler(event){
-      console.log('keydown');
-      console.log(event);
+      //console.log('keydown');
+      //console.log(event);
       if(event.keyCode == 13){
        // Check current input text with previous spoken phrase
    
@@ -212,22 +212,29 @@ e = {
          return;
          //speechMsgInput = $('#usersays').val();
        }
-       lowerCaseInput = speechMsgInput.toLowerCase();
+			 
+       var inputPhrase = speechMsgInput.toLowerCase();
+        // Check current input text with previous spoken phrase
+        var lowerCaseInput = inputPhrase.toLowerCase();
         var lowerCasePhrase = "" + e.defaults.currentPhrase.target;
-       var lowerCasePhraseEnglish = "" + e.defaults.currentPhrase.target;
 
         lowerCasePhrase = lowerCasePhrase.toLowerCase();
-       lowerCasePhraseEnglish = lowerCasePhraseEnglish.toLowerCase();
-   
-       console.log("LOWER Case Phrase: " + lowerCasePhrase);
-       console.log("REMOVE DIACRITICS Phrase: " + e.functions.removeDiacritics(lowerCasePhrase));
 
+        // remove diacritics
         lowerCasePhrase = e.functions.removeDiacritics(lowerCasePhrase);
-       lowerCasePhraseEnglish = e.functions.removeDiacritics(lowerCasePhraseEnglish);
+        lowerCaseInput =  e.functions.removeDiacritics(lowerCaseInput);
+				
+        // remove punctuation
+        lowerCasePhrase = e.functions.removePunctuation(lowerCasePhrase);
+        lowerCaseInput =  e.functions.removePunctuation(lowerCaseInput);
 
-       if ((lowerCasePhrase == lowerCaseInput)||(lowerCasePhraseEnglish == lowerCaseInput)) {
+        console.log("LOWER Case Input: " + lowerCaseInput);
+        console.log("LOWER Case Phrase: " + lowerCasePhrase);
+
+        if (lowerCasePhrase == lowerCaseInput) {
           e.defaults.incorrectAnswerCount=0;
           console.log ("Correct!");
+
           // Clear the text input
           $('#speech-msg').val("");
 					e.functions.getNewPhrase(e.defaults.currentExercise);
