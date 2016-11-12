@@ -212,26 +212,8 @@ e = {
          return;
          //speechMsgInput = $('#usersays').val();
        }
-			 
-       var inputPhrase = speechMsgInput.toLowerCase();
-        // Check current input text with previous spoken phrase
-        var lowerCaseInput = inputPhrase.toLowerCase();
-        var lowerCasePhrase = "" + e.defaults.currentPhrase.target;
 
-        lowerCasePhrase = lowerCasePhrase.toLowerCase();
-
-        // remove diacritics
-        lowerCasePhrase = e.functions.removeDiacritics(lowerCasePhrase);
-        lowerCaseInput =  e.functions.removeDiacritics(lowerCaseInput);
-				
-        // remove punctuation
-        lowerCasePhrase = e.functions.removePunctuation(lowerCasePhrase);
-        lowerCaseInput =  e.functions.removePunctuation(lowerCaseInput);
-
-        console.log("LOWER Case Input: " + lowerCaseInput);
-        console.log("LOWER Case Phrase: " + lowerCasePhrase);
-
-        if (lowerCasePhrase == lowerCaseInput) {
+			if(e.functions.checkAnswer(speechMsgInput, e.defaults.currentPhrase.target)){			 
           e.defaults.incorrectAnswerCount=0;
           console.log ("Correct!");
 
@@ -492,47 +474,28 @@ e = {
 
     // from french-speaking:
 
-    checkAnswer(inputPhrase) {
-        // Check current input text with previous spoken phrase
-        var lowerCaseInput = inputPhrase.toLowerCase();
-        var lowerCasePhrase = "" + e.defaults.currentPhrase.target;
-
-        lowerCasePhrase = lowerCasePhrase.toLowerCase();
+		// compare user phrase with correct phrase
+		// returns true/false
+    checkAnswer(userPhrase, correctPhrase) {
+			
+				userPhrase = "" + userPhrase;
+				correctPhrase = "" + correctPhrase;
+				
+        var lowerCaseUserPhrase = userPhrase.toLowerCase();			
+        var lowerCaseCorrectPhrase = correctPhrase.toLowerCase();
 
         // remove diacritics
-        lowerCasePhrase = e.functions.removeDiacritics(lowerCasePhrase);
-        lowerCaseInput =  e.functions.removeDiacritics(lowerCaseInput);
+        lowerCaseUserPhrase = e.functions.removeDiacritics(lowerCaseUserPhrase);
+        lowerCaseCorrectPhrase =  e.functions.removeDiacritics(lowerCaseCorrectPhrase);
 				
         // remove punctuation
-        lowerCasePhrase = e.functions.removePunctuation(lowerCasePhrase);
-        lowerCaseInput =  e.functions.removePunctuation(lowerCaseInput);
+        lowerCaseUserPhrase = e.functions.removePunctuation(lowerCaseUserPhrase);
+        lowerCaseCorrectPhrase =  e.functions.removePunctuation(lowerCaseCorrectPhrase);
 
-				
+        console.log("LOWER Case Input: " + lowerCaseUserPhrase);
+        console.log("LOWER Case Phrase: " + lowerCaseCorrectPhrase);
 
-        console.log("LOWER Case Input: " + lowerCaseInput);
-        console.log("LOWER Case Phrase: " + lowerCasePhrase);
-
-        if (lowerCasePhrase == lowerCaseInput) {
-          e.defaults.incorrectAnswerCount=0;
-          $('#translation').text("");
-          console.log ("Correct!");
-
-          // Clear the text input
-          $('#usersays').val("");
-          e.functions.skipNextSpeakingPhrase();
-        }
-        else
-        {
-          e.functions.printPhrase(e.defaults.currentPhrase.target);
-          e.defaults.incorrectAnswerCount++;
-          if (e.defaults.incorrectAnswerCount > 3){
-            $('#translation').text(e.defaults.currentPhrase.target);
-
-          }
-          if (e.defaults.incorrectAnswerCount > 5){
-            $('#help').text(e.defaults.currentPhrase.target);
-          }
-        }
+				return (lowerCaseUserPhrase == lowerCaseCorrectPhrase);
     },
 
     /*
@@ -552,7 +515,28 @@ e = {
         var spokenInputConfidence = event.results[0][0].confidence;
         $('#usersays').val("" + spokenInput);
 
-        e.functions.checkAnswer(spokenInput);
+        if(e.functions.checkAnswer(spokenInput, e.defaults.currentPhrase.target)){
+					// correct answer
+          e.defaults.incorrectAnswerCount=0;
+          $('#translation').text("");
+          console.log ("Correct!");
+
+          // Clear the text input
+          $('#usersays').val("");
+          e.functions.skipNextSpeakingPhrase();					
+				}
+				else{
+					// incorrect answer
+          e.functions.printPhrase(e.defaults.currentPhrase.target);
+          e.defaults.incorrectAnswerCount++;
+          if (e.defaults.incorrectAnswerCount > 3){
+            $('#translation').text(e.defaults.currentPhrase.target);
+
+          }
+          if (e.defaults.incorrectAnswerCount > 5){
+            $('#help').text(e.defaults.currentPhrase.target);
+          }					
+				}
       }
       voiceRecognition.onerror = function(event) {
             console.log ("Recognition stopped! (error) " + event.error);
