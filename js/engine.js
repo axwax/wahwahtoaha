@@ -35,6 +35,7 @@ e = {
     speechRate: 1,
     page: "about",
     subpage: "",
+		timeoutID: false,
   },
   functions: {
     arePhrasesLoaded(){
@@ -201,7 +202,12 @@ e = {
 
     },
     keydownHandler(event){
-      //console.log('keydown');
+      console.log('keydown');
+			if ($('.bootbox').length) {
+        console.log('modal open - disable key handling');
+				return;
+      }
+			
       //console.log(event);
       if(event.keyCode == 13){
        // Check current input text with previous spoken phrase
@@ -505,29 +511,46 @@ e = {
     printPhrase(text) {
       $('#translation').text(text);
     },
-
+		cancelVoiceRecognition(title = 'Sorry, I didn\'t hear you', message = 'Try again', messageType = 'false', callback = e.functions.recordVoiceAnswer) {
+			clearTimeout(e.defaults.timeoutID);
+			bootbox.hideAll();
+			console.log('cancel');
+			voiceRecognition.stop();
+			bootbox.alert({
+					message: '<div class="text-center ' + messageType + '"><h2>' + title + '</h2><h3>' + message + '</h3></div>',
+					size: 'small',
+					callback: callback,
+					backdrop: true,
+			});	
+		},
     recordVoiceAnswer() {
-      var voiceRecognition = new webkitSpeechRecognition();
+      if (typeof voiceRecognition !== 'undefined') {
+        voiceRecognition.stop();
+      }
+			e.defaults.timeoutID = setTimeout(e.functions.cancelVoiceRecognition, 5000);
+			voiceRecognition = new webkitSpeechRecognition();
       voiceRecognition.lang = e.defaults.speechApiLanguages[e.defaults.languageTarget];
       voiceRecognition.onresult = function(event) {
+				clearTimeout(e.defaults.timeoutID);
         console.log("I heard this: " + event.results[0][0].transcript);
         var spokenInput = event.results[0][0].transcript;
         var spokenInputConfidence = event.results[0][0].confidence;
         $('#usersays').val("" + spokenInput);
 
         if(e.functions.checkAnswer(spokenInput, e.defaults.currentPhrase.target)){
+					
 					// correct answer
           e.defaults.incorrectAnswerCount=0;
           $('#translation').text("");
           console.log ("Correct!");
-
           // Clear the text input
-          $('#usersays').val("");
-          e.functions.skipNextSpeakingPhrase();					
+					$('#usersays').val("");
+					e.functions.cancelVoiceRecognition('Correct!', '<i class="fa fa-thumbs-o-up fa-5x"></i>', 'correct', e.functions.skipNextSpeakingPhrase);
 				}
 				else{
 					// incorrect answer
           e.functions.printPhrase(e.defaults.currentPhrase.target);
+					e.functions.cancelVoiceRecognition('Try Again', 'I heard: ' + spokenInput, 'info');			
           e.defaults.incorrectAnswerCount++;
           if (e.defaults.incorrectAnswerCount > 3){
             $('#translation').text(e.defaults.currentPhrase.target);
@@ -538,10 +561,15 @@ e = {
           }					
 				}
       }
-      voiceRecognition.onerror = function(event) {
-            console.log ("Recognition stopped! (error) " + event.error);
-            voiceRecognition.stop();
+      voiceRecognition.onerror = function(event) {				
+        console.log ("Recognition stopped! (error) " + event.error);
+				e.functions.cancelVoiceRecognition();						
       }
+			voiceRecognition.onnomatch = function(event) {
+				console.log ("Recognition failed");
+				e.functions.cancelVoiceRecognition('Sorry, I couldn\'t understand you', 'Try again');					
+			}      
+
       voiceRecognition.start();
       console.log ("recognition started");
     },
