@@ -511,22 +511,41 @@ e = {
     printPhrase(text) {
       $('#translation').text(text);
     },
-		cancelVoiceRecognition(title = 'Sorry, I didn\'t hear you', message = 'Try again', messageType = 'false', callback = e.functions.recordVoiceAnswer) {
+		cancelVoiceRecognition(title = 'Sorry, I didn\'t hear you', message = 'Try again?', messageType = 'false', callback = e.functions.recordVoiceAnswer) {
 			clearTimeout(e.defaults.timeoutID);
+			$('#record').removeClass('btn-success').addClass('btn-warning').html('<span aria-hidden="true" class="glyphicon glyphicon-record"></span> Speak your translation');
 			bootbox.hideAll();
 			console.log('cancel');
 			voiceRecognition.stop();
-			bootbox.alert({
+			bootbox.confirm({
 					message: '<div class="text-center ' + messageType + '"><h2>' + title + '</h2><h3>' + message + '</h3></div>',
 					size: 'small',
 					callback: callback,
 					backdrop: true,
+					buttons: {
+							confirm: {
+									label: 'Yes',
+									className: 'btn-warning'
+							},
+							cancel: {
+									label: 'No',
+									className: 'btn-default'
+							}
+					},					
 			});	
 		},
-    recordVoiceAnswer() {
+    recordVoiceAnswer(response = true) {
+			if (!response) {
+        console.log('cancelled');
+				return;
+      }
+			else console.log(response);
+
       if (typeof voiceRecognition !== 'undefined') {
         voiceRecognition.stop();
       }
+			
+			$('#record').removeClass('btn-warning').addClass('btn-success').html('<i class="fa fa-spinner fa-pulse fa-1x fa-fw"></i> Speak your translation');
 			e.defaults.timeoutID = setTimeout(e.functions.cancelVoiceRecognition, 5000);
 			voiceRecognition = new webkitSpeechRecognition();
       voiceRecognition.lang = e.defaults.speechApiLanguages[e.defaults.languageTarget];
@@ -574,8 +593,16 @@ e = {
       console.log ("recognition started");
     },
     // this is different from the listening function, so let's keep it here for now
-    skipNextSpeakingPhrase(){
+    skipNextSpeakingPhrase(response = true){
+			if (!response) {
+        console.log('cancelled');
+				return;
+      }
+			else console.log(response);
       console.log('skip');
+			clearTimeout(e.defaults.timeoutID);
+			$('#record').removeClass('btn-success').addClass('btn-warning').html('<span aria-hidden="true" class="glyphicon glyphicon-record"></span> Speak your translation');
+
       e.defaults.incorrectAnswerCount=0;
       $('#translation').text("");
       // Clear the text input
